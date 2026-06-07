@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radioline RSSI Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .form-group label {
+            width: 180px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .form-group input, .form-group select {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: monospace;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group small {
+            width: 100%;
+            margin-left: 180px;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .error {
+            background: #fee;
+            border-left: 4px solid #f44;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            color: #c33;
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        
+        .result h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .result-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+            font-family: monospace;
+        }
+        
+        .result-value.rssi {
+            color: #764ba2;
+            font-size: 24px;
+        }
+        
+        .info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #0056b3;
+        }
+        
+        @media (max-width: 600px) {
+            .form-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .form-group label {
+                margin-bottom: 8px;
+            }
+            
+            .form-group input, .form-group select {
+                width: 100%;
+            }
+            
+            .form-group small {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Radioline RSSI Calculator</h1>
+            <p>Calculate Received Signal Strength Indicator for radio links</p>
+        </div>
+        
+        <div class="content">
+            <form method="post" action="/calculate">
+                <div class="form-group">
+                    <label>Ptx (dB):</label>
+                    <input type="number" 
+                           name="Ptx" 
+                           value="{{ form_data.Ptx if form_data else 30 }}"
+                           step="0.1"
+                           required>
+                    <small>Transmitter power</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Gtx (dB):</label>
+                    <input type="number" 
+                           name="Gtx" 
+                           value="{{ form_data.Gtx if form_data else 15 }}"
+                           step="0.1"
+                           required>
+                    <small>Transmitter gain</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Grx (dB):</label>
+                    <input type="number" 
+                           name="Grx" 
+                           value="{{ form_data.Grx if form_data else 15 }}"
+                           step="0.1"
+                           required>
+                    <small>Receiver gain</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Distance (km):</label>
+                    <input type="number" 
+                           name="d" 
+                           value="{{ form_data.d if form_data else 10 }}"
+                           step="any"
+                           min="0.01"
+                           required>
+                    <small>Distance between TX and RX [km]</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Frequency (GHz):</label>
+                    <input type="number" 
+                           name="f" 
+                           value="{{ form_data.f if form_data else 5 }}"
+                           step="any"
+                           min="0.01"
+                           required>
+                    <small>Signal frequency [GHz]</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Rain density (mm/h):</label>
+                    <select name="rain_density">
+                        <option value="0" {% if form_data and form_data.rain_density == '0' %}selected{% endif %}>0</option>
+                        <option value="5" {% if form_data and form_data.rain_density == '5' %}selected{% endif %}>5</option>
+                        <option value="25" {% if form_data and form_data.rain_density == '25' %}selected{% endif %}>25</option>
+                        <option value="50" {% if form_data and form_data.rain_density == '50' %}selected{% endif %}>50</option>
+                        <option value="100" {% if form_data and form_data.rain_density == '100' %}selected{% endif %}>100</option>
+                        <option value="150" {% if form_data and form_data.rain_density == '150' %}selected{% endif %}>150</option>
+                        <option value="200" {% if form_data and form_data.rain_density == '200' %}selected{% endif %}>200</option>
+                    </select>
+                    <small>Optional: rain intensity</small>
+                </div>
+                
+                <button type="submit">Calculate RSSI →</button>
+            </form>
+            
+            {% if error %}
+            <div class="error">
+                <strong>⚠️ Error:</strong> {{ error }}
+            </div>
+            {% endif %}
+            
+            {% if result %}
+            <div class="result">
+                <h2>Calculation Results</h2>
+                <div class="result-item">
+                    <span class="result-label">RSSI (Received Signal Strength):</span>
+                    <span class="result-value rssi">{{ result.RSSI }} dB</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">FSPL (Free Space Path Loss):</span>
+                    <span class="result-value">{{ result.FSPL }} dB</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Rain Attenuation:</span>
+                    <span class="result-value">{{ result.rain_attenuation }} dB</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Atmosphere Attenuation:</span>
+                    <span class="result-value">{{ result.atmosphere_attenuation }} dB</span>
+                </div>
+            </div>
+            
+            <div class="info">
+                <strong>Formula:</strong> RSSI = Ptx + Gtx - FSPL - Rain_Att - Atmosphere_Att + Grx
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
