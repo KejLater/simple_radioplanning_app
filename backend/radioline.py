@@ -17,6 +17,7 @@ class Radioline:
         rain_density - None/0/5/25/50/100/150/200 [mm per hour] (Optional).
         """
 
+        # TODO validation
         self._Ptx = Ptx
         self._Gtx = Gtx
         self._Grx = Grx
@@ -49,12 +50,21 @@ class Radioline:
             return 0
         else:
             import pandas as pd
-            df = pd.read_csv('./rain_attenuation.csv', sep=',', decimal='.')
-            
 
+            schema = {
+                'freq_GHz': float,
+                'att_dB_per_km': float,
+                'rain_rate_mm_per_h': str
+            }
+
+            df = pd.read_csv('./data/rain_attenuation.csv', sep=',', decimal='.', dtype=schema)
+            df_filtered = df[df.rain_rate_mm_per_h==str(self._rain_density)]
+            idx = (df_filtered.freq_GHz - self._f).abs().idxmin()
+            return df_filtered.loc[idx, 'att_dB_per_km']
 
 
     @property
     def atmosphere_attenuation(self):
         pass 
+
 
