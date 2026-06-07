@@ -7,7 +7,7 @@ class Radioline:
     based on distance between tx-rx, 
     rain density, frequency, gains.
     """
-    def __init__(self, Ptx: int, Gtx: int, Grx: int, d: int, f: int, rain_density: int|str|None=None):
+    def __init__(self, Ptx: float, Gtx: float, Grx: float, d: float, f: float, rain_density: int|str|None=None):
         """
         Ptx - power of sourse signal [dB]
         Gtx - gain of transmitter [dB]
@@ -26,12 +26,15 @@ class Radioline:
         self._rain_density = rain_density
 
     @property
-    def RSSI(self):
-        pass
+    def RSSI(self) -> float:
+        """
+        Calculates RSSI.
+        """
+        return self._Ptx + self._Gtx - self.FSPL - self.rain_attenuation - self.atmosphere_attenuation + self._Grx
 
 
     @property
-    def FSPL(self):
+    def FSPL(self) -> float:
         """
         Calculates Free Space Propagation Loss.
         """
@@ -40,7 +43,7 @@ class Radioline:
 
 
     @property
-    def rain_attenuation(self):
+    def rain_attenuation(self) -> float:
         """
         Calculates signal attenuation [dB] based
         on rain density, if rain density is 
@@ -64,7 +67,17 @@ class Radioline:
 
 
     @property
-    def atmosphere_attenuation(self):
-        pass 
+    def atmosphere_attenuation(self) -> float:
+        import pandas as pd
 
+        schema = {
+            'freq_GHz': float,
+            'att_dB_per_km': float,
+        }
 
+        df = pd.read_csv('./data/atmosphere_attenuation.csv', sep=',', decimal='.', dtype=schema)
+        idx = (df.freq_GHz - self._f).abs().idxmin()
+        return df.loc[idx, 'att_dB_per_km']
+
+line = Radioline(10,10,15,5,14)
+print(line.RSSI)
