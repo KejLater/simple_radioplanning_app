@@ -1,0 +1,60 @@
+
+
+class Radioline:
+    """
+    Class describes behavior of 
+    signal between tx and rx 
+    based on distance between tx-rx, 
+    rain density, frequency, gains.
+    """
+    def __init__(self, Ptx: int, Gtx: int, Grx: int, d: int, f: int, rain_density: int|str|None=None):
+        """
+        Ptx - power of sourse signal [dB]
+        Gtx - gain of transmitter [dB]
+        Grx - gain of receiver [dB]
+        d - distance between tx and rx [km]
+        f - signal frequency [GHz]
+        rain_density - None/0/5/25/50/100/150/200 [mm per hour] (Optional).
+        """
+
+        self._Ptx = Ptx
+        self._Gtx = Gtx
+        self._Grx = Grx
+        self._d = d
+        self._f = f
+        self._rain_density = rain_density
+
+    @property
+    def RSSI(self):
+        pass
+
+
+    @property
+    def FSPL(self):
+        """
+        Calculates Free Space Propagation Loss.
+        """
+        from math import log10
+        return 92.45 + 20*log10(self._d) + 20*log10(self._f)
+
+
+    @property
+    def rain_attenuation(self):
+        """
+        Calculates signal attenuation [dB] based
+        on rain density, if rain density is 
+        0 or None, 0 will be returned.
+        """
+        if not self._rain_density or self._rain_density == '0':
+            return 0
+        else:
+            import pandas as pd
+            df = pd.read_csv('./rain_attenuation.csv', sep=',', decimal='.')
+            
+
+
+
+    @property
+    def atmosphere_attenuation(self):
+        pass 
+
