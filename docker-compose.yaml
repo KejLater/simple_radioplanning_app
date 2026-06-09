@@ -1,0 +1,11 @@
+services:
+  rrl-profile:
+
+    build: .
+
+    container_name: rrl-profile
+
+    ports:
+      - "5000:5000"
+
+    restart: unless-stopped
